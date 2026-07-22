@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Page Not Found | The North Creek Estate</title>
+<meta name="robots" content="noindex,follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#F5F0E6; --ivory-warm:#EFE8D9; --ink:#111; --ink-soft:#3a3a36;
+    --gold:#C5A258; --green-deep:#004400; --green-primary:#1F5A36; --green-shadow:#0a2417;
+    --serif:"Cormorant Garamond",Georgia,serif; --sans:"Inter",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:var(--sans); color:var(--ivory);
+    background:linear-gradient(160deg,var(--green-primary),var(--green-shadow));
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    padding:40px 24px; -webkit-font-smoothing:antialiased;
+  }
+  .card{max-width:560px}
+  .mono{
+    width:84px;height:84px;border-radius:50%;margin:0 auto 28px;
+    border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-weight:600;font-size:34px;color:var(--ivory);letter-spacing:1px;
+  }
+  .eyebrow{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin:0 0 14px}
+  h1{font-family:var(--serif);font-weight:500;font-size:clamp(38px,7vw,64px);line-height:1.05;margin:0 0 18px}
+  p{font-size:17px;line-height:1.6;color:rgba(245,240,230,.82);margin:0 auto 32px;max-width:44ch}
+  .btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+  a.btn{
+    display:inline-block;font-size:15px;letter-spacing:.02em;text-decoration:none;
+    padding:13px 26px;border-radius:2px;transition:background .2s,color .2s,border-color .2s;
+  }
+  a.solid{background:var(--gold);color:var(--green-shadow);border:1px solid var(--gold)}
+  a.solid:hover{background:var(--ivory);border-color:var(--ivory)}
+  a.ghost{background:transparent;color:var(--ivory);border:1px solid rgba(245,240,230,.5)}
+  a.ghost:hover{border-color:var(--gold);color:var(--gold)}
+</style>
+</head>
+<body>
+  <main class="card">
+    <div class="mono">NC</div>
+    <p class="eyebrow">The North Creek Estate</p>
+    <h1>This path leads nowhere on the grounds.</h1>
+    <p>The page you were looking for has moved, closed for the season, or never existed. Let us walk you back to familiar ground.</p>
+    <div class="btns">
+      <a class="btn solid" href="/index.html">Return Home</a>
+      <a class="btn ghost" href="/plan.html">Plan a Visit</a>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,13 @@
+.DS_Store
+*.DS_Store
+
+# 895MB, not referenced by any page — do not version or upload
+image/North Creek Estate P1.mp4
+
+# Launch tooling — not part of the site, never upload
+create-stripe-links.sh
+stripe-links.txt
+
+# Supabase CLI local artifacts / Claude local settings
+supabase/.temp/
+.claude/settings.local.json

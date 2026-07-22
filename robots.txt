@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Non-public / member / transactional pages
+Disallow: /admin.html
+Disallow: /account.html
+Disallow: /cancel.html
+Disallow: /gatherings.html
+
+Sitemap: https://thenorthcreek.com/sitemap.xml

@@ -1,0 +1,32 @@
+name: Deploy Supabase functions
+
+# Deploys edge functions when their source changes on main.
+# Requires one repository secret:
+#   SUPABASE_ACCESS_TOKEN  — create at https://supabase.com/dashboard/account/tokens
+# verify_jwt per function comes from supabase/config.toml.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "supabase/functions/**"
+      - "supabase/config.toml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-supabase
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_REF: essciypxrnfzqzsfyole
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Deploy all functions
+        run: supabase functions deploy --project-ref "$PROJECT_REF"

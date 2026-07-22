@@ -1,0 +1,86 @@
+# THE NORTH CREEK ESTATE — Apache config for GoDaddy shared hosting (cPanel)
+# Static site. Safe defaults; every block is guarded so a missing module won't 500.
+
+# ---------------------------------------------------------------------------
+# Default document
+# ---------------------------------------------------------------------------
+DirectoryIndex index.html
+
+# ---------------------------------------------------------------------------
+# Force HTTPS and canonical host (www.thenorthcreek.com -> thenorthcreek.com)
+# The site's structured data uses the bare domain, so we canonicalize to it.
+# ---------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # www -> non-www (preserve scheme decision to the HTTPS rule below)
+  RewriteCond %{HTTP_HOST} ^www\.thenorthcreek\.com$ [NC]
+  RewriteRule ^ https://thenorthcreek.com%{REQUEST_URI} [L,R=301]
+
+  # http -> https  (GoDaddy sets HTTPS=on when the request is secure)
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Custom error page
+# ---------------------------------------------------------------------------
+ErrorDocument 404 /404.html
+
+# ---------------------------------------------------------------------------
+# Keep internal / deploy files from being served publicly
+# ---------------------------------------------------------------------------
+<FilesMatch "(?i)\.(txt|md)$">
+  Require all denied
+</FilesMatch>
+# ...but robots.txt must stay reachable.
+<Files "robots.txt">
+  Require all granted
+</Files>
+<Files "NorthCreek_Email_Previews.html">
+  Require all denied
+</Files>
+# Never serve dotfiles (.htaccess, .git artifacts, etc.)
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+
+# ---------------------------------------------------------------------------
+# Security headers
+# ---------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(self), camera=(), microphone=()"
+  # HSTS — only enable once you're confident HTTPS is stable on every subdomain.
+  # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Compression
+# ---------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml \
+    application/javascript application/json image/svg+xml
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# Browser caching  (long for assets, short for HTML so edits show up quickly)
+# ---------------------------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html                 "access plus 10 minutes"
+  ExpiresByType text/css                  "access plus 1 year"
+  ExpiresByType application/javascript    "access plus 7 days"
+  ExpiresByType image/png                 "access plus 1 year"
+  ExpiresByType image/jpeg                "access plus 1 year"
+  ExpiresByType image/webp                "access plus 1 year"
+  ExpiresByType image/svg+xml             "access plus 1 year"
+  ExpiresByType image/x-icon              "access plus 1 year"
+  ExpiresByType font/woff2                "access plus 1 year"
+  # config.js changes when live Stripe links are pasted — keep it short so it propagates fast.
+  <Files "config.js">
+    ExpiresDefault "access plus 10 minutes"
+  </Files>
+</IfModule>

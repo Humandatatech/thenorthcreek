@@ -1,6 +1,10 @@
-/* THE NORTH CREEK ESTATE — front-end config
+/* THE NORTH CREEK ESTATE — front-end config  (PRODUCTION — thenorthcreek.com)
  * Public values only. Never put Stripe secret keys or the Supabase service-role key here.
- * Fill in the blanks below with values from your Stripe and Supabase dashboards.
+ *
+ * STATUS: LIVE — all 7 payment links below are live-mode (buy.stripe.com, no test_),
+ * verified against Stripe on 2026-07-21 (account acct_1TBnsxDgZdINFZy5).
+ * Each link redirects to /account.html after purchase.
+ * Still pending: customerPortalUrl (dashboard > Settings > Billing > Customer portal).
  */
 window.NC_CONFIG = {
   supabase: {
@@ -8,28 +12,29 @@ window.NC_CONFIG = {
     anonKey: "sb_publishable_VMPDSJ0aTjzR30QJu1F7xA_nQPY3jTb"   // publishable anon key — safe in the browser
   },
   stripe: {
-    // Billing > Customer portal link, used by "Manage membership"
+    // Billing > Customer portal link, used by "Manage membership".
+    // Paste the LIVE customer portal link (https://billing.stripe.com/p/login/…).
     customerPortalUrl: ""
   },
 
   /* GO-LIVE SWITCH for checkout.
    * false = pay buttons do NOT reach Stripe; clicking shows a polite "opens soon" notice.
-   *         Use this while the Supabase webhook (records payment + issues pass + emails)
-   *         is not yet deployed, so no money is taken with nothing behind it.
    * true  = pay buttons become live Stripe Payment Links (normal behavior).
-   * Flip to true ONLY after the webhook is deployed and smoke-tested. */
-  checkoutEnabled: true,   // TEST BUILD — staging only
+   * Keep true for production. Buttons with an unfilled link below still fall back safely
+   * to their on-page navigation, so it is safe to be live before every link is pasted. */
+  checkoutEnabled: true,
   checkoutComingSoonMsg: "Enrollment opens shortly. Email events@thenorthcreek.com to be invited first.",
-  /* Stripe Dashboard > Payments > Payment Links. Paste each URL here.
+
+  /* Stripe Dashboard > Payments > Payment Links — paste each LIVE URL here.
      Recurring links (memberships) create a Subscription; one-time links create a Charge. */
   paymentLinks: {
-    "estate-pass":          "https://buy.stripe.com/test_bJe14n2cc4kmbWR9aggQE00",  // Estate Pass — $100/mo (recurring)
-    "founding-annual":      "https://buy.stripe.com/test_bJe4gz6ss5oq2mhcmsgQE01",  // Founding Membership — $3,000/yr (recurring)
-    "founding-monthly":     "https://buy.stripe.com/test_28EdR9eYYcQS3ql5Y4gQE02",  // Founding Membership — $250/mo (recurring)
-    "creek-pass":           "https://buy.stripe.com/test_aFaeVd6ssaIKbWRfyEgQE03",  // Creek Pass — $40/mo standalone (recurring)
-    "range-bucket":         "https://buy.stripe.com/test_dRm3cvbMMcQSd0V4U0gQE04",  // Practice Range — $12 prepaid bucket (adjustable quantity)
-    "ticket-gathering":     "https://buy.stripe.com/test_cNi6oHeYY2ce6Cx1HOgQE05",  // Signature Gathering — $100/guest
-    "ticket-tunnel-vision": "https://buy.stripe.com/test_6oU28r5oo2cef934U0gQE06"   // Tunnel Vision — $60
+    "estate-pass":          "https://buy.stripe.com/00weVd15L68kg1dgey43S00",  // LIVE — Estate Pass — $100/mo (recurring)
+    "founding-annual":      "https://buy.stripe.com/3cI00j8yd40ccP10fA43S01",  // LIVE — Founding Membership — $3,000/yr (recurring)
+    "founding-monthly":     "https://buy.stripe.com/28E9ATdSxcwI3er1jE43S02",  // LIVE — Founding Membership — $250/mo (recurring)
+    "creek-pass":           "https://buy.stripe.com/5kQ00j9ChaoA6qD6DY43S03",  // LIVE — Creek Pass — $40/mo standalone (recurring)
+    "range-bucket":         "https://buy.stripe.com/14AfZh4hX2W85mz1jE43S04",  // LIVE — Practice Range — $12 prepaid bucket (adjustable quantity)
+    "ticket-gathering":     "https://buy.stripe.com/6oUeVd7u9bsE7uHbYi43S05",  // LIVE — Signature Gathering — $100/guest
+    "ticket-tunnel-vision": "https://buy.stripe.com/aFabJ1g0F54gg1d8M643S06"   // LIVE — Tunnel Vision — $60
   }
 };
 

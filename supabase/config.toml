@@ -1,0 +1,23 @@
+project_id = "essciypxrnfzqzsfyole"
+
+# All North Creek edge functions are publicly reachable (they do their own auth:
+# Stripe signature verification, staff bearer tokens, or signed pass tokens).
+# Matches production settings as of 2026-07-22.
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.verify]
+verify_jwt = false
+
+[functions.cancel]
+verify_jwt = false
+
+[functions.plans-sync]
+verify_jwt = false
+
+[functions.office]
+verify_jwt = false
+
+[functions.invite]
+verify_jwt = false
