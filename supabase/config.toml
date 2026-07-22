@@ -21,3 +21,6 @@ verify_jwt = false
 
 [functions.invite]
 verify_jwt = false
+
+[functions.ics]
+verify_jwt = false

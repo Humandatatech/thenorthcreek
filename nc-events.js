@@ -18,13 +18,15 @@
   function longDate(d){return d?new Date(d+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"}):""}
 
   function icsHref(ev){
+    // Served .ics (not a data: URI) so iOS opens the native Calendar sheet
+    // and desktop browsers download a valid RFC 5545 file.
     if(!ev.event_date) return null;
-    var dt=ev.event_date.replace(/-/g,"");
-    var body=["BEGIN:VCALENDAR","VERSION:2.0","BEGIN:VEVENT",
-      "DTSTART;VALUE=DATE:"+dt,"SUMMARY:"+(ev.title||"North Creek"),
-      "LOCATION:"+((ev.location||"")+" — The North Creek Estate"),
-      "DESCRIPTION:"+((ev.blurb||"").replace(/\n/g," ")),"END:VEVENT","END:VCALENDAR"].join("\r\n");
-    return "data:text/calendar;charset=utf8,"+encodeURIComponent(body);
+    return cfg.url + "/functions/v1/ics?" + new URLSearchParams({
+      t: ev.title || "North Creek Estate Event",
+      d: ev.event_date,
+      l: ev.location || "",
+      x: (ev.blurb || "").replace(/\n/g, " ")
+    }).toString();
   }
 
   // Home-style compact row
@@ -36,7 +38,7 @@
     return '<article class="event"><div class="event__date"><div class="mo">'+esc(monShort(ev.event_date))+'</div><div class="day">'+esc(dayNum(ev.event_date))+'</div></div>'
       +'<div><h3>'+esc(ev.title)+'</h3><p>'+esc(ev.blurb||"")+'</p>'
       +'<div class="event__meta">'+esc(meta)+'</div>'+cta
-      +(ics?' &nbsp; <a class="lk" href="'+ics+'" download="'+esc(ev.title)+'.ics">+ Add to calendar</a>':'')
+      +(ics?' &nbsp; <a class="lk" href="'+ics+'">+ Add to calendar</a>':'')
       +'</div></article>';
   }
 
@@ -56,7 +58,7 @@
       + '<div class="inv-card__cta">'
       + (ev.ticket_url?'<a class="btn btn--outline" href="'+esc(ev.ticket_url)+'">Get Tickets <span class="arr">&rarr;</span></a>':'')
       + (ev.flyer_url?'<a class="lk" href="'+esc(ev.flyer_url)+'" target="_blank" rel="noopener">Flyer</a>':'')
-      + (ics?'<a class="lk" href="'+ics+'" download="'+esc(ev.title)+'.ics">+ Calendar</a>':'')
+      + (ics?'<a class="lk" href="'+ics+'">+ Calendar</a>':'')
       + '</div></div></article>';
   }
 
