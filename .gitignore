@@ -11,3 +11,7 @@ stripe-links.txt
 # Supabase CLI local artifacts / Claude local settings
 supabase/.temp/
 .claude/settings.local.json
+
+# Internal working documents — never version or deploy
+copydeck-v7.pdf
+*CopyDeck*
