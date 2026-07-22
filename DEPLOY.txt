@@ -1,0 +1,20 @@
+NORTH CREEK — STAGING DEPLOY (v6.15)
+
+Upload the CONTENTS of this folder to your staging path (…/nc/), replacing the
+old .html files and config.js.
+
+DO NOT upload an image/ folder from here, and do NOT delete or overwrite your
+existing  /nc/image/  folder — it already holds all your photography, and these
+pages reference it (image/<filename>) relative to the pages.
+
+If a previous deploy replaced your /nc/image/ folder and images went blank,
+re-upload your photos into  /nc/image/  and the heroes + galleries will return.
+
+Pages expect these files to sit in /nc/image/ :
+  Hero1_Clubhouse_AerialView.png   (home hero)
+  TheGrand_3719-HDR.jpg, Grand_3734-HDR.jpg, Grand_BohemianDress.png
+  TheGallery_3514-HDR.jpg, TheGallery_3524-HDR.jpg, GallerySetting.png
+  TheReserve_3554-HDR.jpg, TheReserve_3534-HDR.jpg, ReserveCorridor_3579-HDR.jpg
+  PurpleHull_staged.png
+  GardenWeddingSet.png, Clubhouse-CreekView.png, SunsetTerraceView.png
+  Tee Range Perspective.png

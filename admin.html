@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#072e17">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<title>North Creek &middot; Verify</title>
+<style>
+  /* ===== DRGx OPERATOR CONSOLE (matches Crestline console reference) ===== */
+  :root,[data-theme="light"]{
+    --bg:#f4f2ec; --panel:#ffffff; --panel2:#faf8f2; --elev:#ffffff;
+    --line:#e7e2d6; --line2:#d8d2c4;
+    --text:#1c1c19; --muted:#8d887c; --dim:#b4afa2;
+    --green:#2f8560; --purple:#6d5bbf; --teal:#3b9a97; --red:#bf4f3d; --amber:#a97d28;
+    --accent:#2f8560;
+    --shadow:0 1px 2px rgba(30,28,20,.04);
+  }
+  [data-theme="dark"]{
+    --bg:#121310; --panel:#191b16; --panel2:#1f221b; --elev:#20241d;
+    --line:#2a2e25; --line2:#3a3f33;
+    --text:#e6e4d8; --muted:#8b8f80; --dim:#5e6355;
+    --green:#4dbd80; --purple:#9585dd; --teal:#4fb7b3; --red:#e0685a; --amber:#d19a3e;
+    --accent:#4dbd80;
+    --shadow:0 1px 0 rgba(255,255,255,.02),0 12px 30px rgba(0,0,0,.35);
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme]){
+    --bg:#121310;--panel:#191b16;--panel2:#1f221b;--line:#2a2e25;--line2:#3a3f33;--text:#e6e4d8;--muted:#8b8f80;--dim:#5e6355;--green:#4dbd80;--purple:#9585dd;--teal:#4fb7b3;--red:#e0685a;--amber:#d19a3e;--accent:#4dbd80;
+  }}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono','IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:13.5px;-webkit-font-smoothing:antialiased;line-height:1.55}
+  h1,h2,h3,h4,.serif{font-family:'Newsreader',Georgia,'Times New Roman',serif;font-weight:500;color:var(--text);margin:0;letter-spacing:0}
+  a{color:var(--accent)}
+  input,select{font-family:'JetBrains Mono',monospace;font-size:14px;padding:11px 12px;border:1px solid var(--line2);background:var(--panel);width:100%;color:var(--text)}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  input::placeholder{color:var(--dim)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;border:1px solid var(--line2);background:transparent;color:var(--text);padding:10px 15px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;text-decoration:none;width:100%;transition:.12s}
+  .btn:hover{border-color:var(--accent);color:var(--accent)}
+  .btn:active{transform:translateY(1px)}
+  .btn--solid{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:500}
+  .btn--solid:hover{background:var(--text);border-color:var(--text);color:var(--bg)}
+  .btn--gold{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn--danger{border-color:var(--red);color:var(--red)}.btn--danger:hover{background:var(--red);color:#fff}
+  .btn--ghost{border-color:var(--line2);color:var(--muted)}.btn--ghost:hover{border-color:var(--accent);color:var(--accent)}
+  .btn:disabled{opacity:.4}
+  .muted{color:var(--muted)}.small{font-size:11.5px}.mt{margin-top:14px}.center{text-align:center}.hide{display:none!important}
+  .eyebrow,.vh,.k{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500;font-family:'JetBrains Mono',monospace}
+
+  /* auth */
+  #signin,#denied{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+  .authcard{width:100%;max-width:400px;background:var(--panel);padding:34px 28px;text-align:center;border:1px solid var(--line);box-shadow:var(--shadow)}
+  .mono{width:46px;height:46px;border:1px solid var(--text);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--text);letter-spacing:1px}
+  #signin .mono,#denied .mono{margin:0 auto 18px}
+  #signin h1,#denied h2{font-size:26px;color:var(--text)}
+  #signin .eyebrow{margin-bottom:8px}
+
+  /* shell */
+  #admin{min-height:100vh;display:flex;flex-direction:column;padding-bottom:70px}
+  .appbar{position:sticky;top:0;z-index:20;background:var(--panel);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:12px 18px;padding-top:calc(12px + env(safe-area-inset-top))}
+  .appbar .brand{display:flex;align-items:center;gap:12px}
+  .appbar .mono{width:34px;height:34px;font-size:13px}
+  .appbar .ttl{font-family:'Newsreader',Georgia,serif;font-size:18px;line-height:1;color:var(--text)}
+  .appbar .ttl small{display:block;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+  .appbar .who{font-size:10px;color:var(--muted);text-align:right;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .iconbtn{height:32px;padding:0 12px;flex:none;border:1px solid var(--line2);background:transparent;color:var(--muted);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;display:flex;align-items:center;justify-content:center}
+  .iconbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .view{flex:1;padding:20px 18px;max-width:720px;width:100%;margin:0 auto}
+  .view h2.vh{margin-bottom:12px}
+
+  /* verify */
+  .searchwrap input{padding:15px 16px;font-size:15px;border:1px solid var(--text);background:var(--panel)}
+  .searchrow{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:8px}
+  .scanbtn{border:1px solid var(--line2);background:var(--panel);color:var(--text);padding:0 16px;display:flex;align-items:center;gap:8px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+  .scanbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .scanbtn svg{width:17px;height:17px}
+  #video{width:100%;background:#000;display:none;margin-top:12px;aspect-ratio:1;border:1px solid var(--line2)}
+  .hint{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;line-height:1.7}
+
+  /* verdict */
+  .verdict{margin-top:16px;background:var(--panel);border:1px solid var(--line);overflow:hidden;box-shadow:var(--shadow)}
+  .verdict__band{padding:15px 18px;display:flex;align-items:center;gap:13px;border-bottom:1px solid var(--line)}
+  .verdict__band .mk{width:12px;height:12px;flex:none}
+  .verdict__band.ok .mk{background:var(--green)} .verdict__band.no .mk{background:var(--red)}
+  .verdict__band .lbl{font-family:'JetBrains Mono',monospace;font-size:15px;line-height:1.1;letter-spacing:.06em;text-transform:uppercase}
+  .verdict__band.ok .lbl{color:var(--green)} .verdict__band.no .lbl{color:var(--red)}
+  .verdict__band .lbl small{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+  .verdict__id{display:flex;align-items:center;gap:14px;padding:16px 18px}
+  .avatar{width:48px;height:48px;border:1px solid var(--line2);color:var(--text);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;flex:none}
+  .verdict__id .nm{font-family:'Newsreader',Georgia,serif;font-size:22px;color:var(--text);line-height:1.1}
+  .verdict__id .sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .paystat{display:inline-flex;align-items:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:3px 9px;margin-top:8px;border:1px solid}
+  .paystat.paid{color:var(--green);border-color:var(--green)}
+  .paystat.past_due{color:var(--amber);border-color:var(--amber)}
+  .paystat.canceled{color:var(--red);border-color:var(--red)}
+  .holds{border-top:1px solid var(--line)}
+  .hold{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line)}
+  .hold:last-child{border-bottom:0}
+  .hold .h-l .h-t{font-family:'Newsreader',Georgia,serif;font-weight:500;font-size:15px}
+  .hold .h-l .h-s{font-size:10.5px;color:var(--muted);margin-top:1px;font-family:'JetBrains Mono',monospace}
+  .pill{display:inline-block;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line2);font-weight:500;color:var(--muted)}
+  .pill.active{color:var(--green);border-color:var(--green)}
+  .pill.canceled,.pill.past_due{color:var(--red);border-color:var(--red)}
+  .pill.redeemed{color:var(--muted)}
+  .hold .mini{border:1px solid var(--line2);background:var(--panel);color:var(--text);padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+  .hold .mini:hover{border-color:var(--accent);color:var(--accent)}
+  .hold .mini.danger{border-color:var(--red);color:var(--red)}
+  .vmsg{padding:11px 18px;font-size:12px}
+
+  /* panels/tables */
+  .card{background:var(--panel);border:1px solid var(--line);padding:18px;box-shadow:var(--shadow)}
+  .stat{background:var(--panel);border:1px solid var(--line);padding:15px 16px;position:relative;overflow:hidden;margin-bottom:10px}
+  .stat::after{content:"";position:absolute;top:14px;left:0;width:2px;height:22px;background:var(--accent)}
+  .stat .v{font-family:'JetBrains Mono',monospace;font-size:1.9rem;color:var(--text);margin-top:7px;line-height:1;letter-spacing:-.01em}
+  table{width:100%;border-collapse:collapse;font-size:12px;font-family:'JetBrains Mono',monospace}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  thead th{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--panel2)}
+  tbody tr:hover{background:var(--panel2)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.grow{flex:1;min-width:150px}
+  .verdictbig{width:84px;height:84px;border:1px solid var(--green);color:var(--green);font-family:'JetBrains Mono',monospace;font-size:38px;line-height:82px;text-align:center;margin:0 auto}
+
+  /* more menu */
+  .menu{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line)}
+  .menu button{display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;background:var(--panel);padding:15px 16px;font-family:'Newsreader',Georgia,serif;font-size:15px;cursor:pointer;color:var(--text);text-align:left;width:100%}
+  .menu button:hover{background:var(--panel2);color:var(--accent)}
+  .menu button svg{width:15px;height:15px;color:var(--muted)}
+  .subhead{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+  .backbtn{border:1px solid var(--line2);background:var(--panel);color:var(--muted);padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+  .backbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .subhead h2{font-size:20px}
+
+  /* back office */
+  .an-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px}
+  .an-two{display:grid;grid-template-columns:1fr;gap:12px}
+  .exp-grid{display:grid;grid-template-columns:1fr;gap:9px}
+  .bar{display:flex;align-items:center;gap:10px;margin:5px 0}
+  .bar .bl{width:56px;font-size:10px;color:var(--muted);text-align:right;flex:none}
+  .bar .bt{height:14px;background:var(--accent);min-width:2px}
+  .bar .bv{font-size:11px;color:var(--muted)}
+  .timeline{position:relative;padding-left:18px;margin-top:8px}
+  .timeline::before{content:"";position:absolute;left:4px;top:4px;bottom:4px;width:1px;background:var(--line2)}
+  .tl{position:relative;padding:7px 0 7px 4px}
+  .tl::before{content:"";position:absolute;left:-16px;top:12px;width:7px;height:7px;background:var(--accent)}
+  .tl .tt{font-family:'Newsreader',Georgia,serif;font-weight:500;font-size:14px}.tl .td{font-size:10.5px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+  h4{font-family:'Newsreader',Georgia,serif;font-size:16px;font-weight:500}
+  .mdcard{background:var(--panel);border:1px solid var(--line);overflow:hidden;box-shadow:var(--shadow)}
+  .mdhead{border-bottom:1px solid var(--line);border-left:2px solid var(--accent);padding:16px}
+  .mdhead .nm{font-family:'Newsreader',Georgia,serif;font-size:20px;color:var(--text);line-height:1.1}
+  .mdhead .sub{font-size:11px;color:var(--muted);margin-top:3px;font-family:'JetBrains Mono',monospace}
+
+  /* bottom tab bar */
+  .tabbar{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(2,1fr);padding-bottom:env(safe-area-inset-bottom)}
+  .tabbar button{border:0;background:none;padding:9px 0 10px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;border-top:2px solid transparent;margin-top:-1px}
+  .tabbar button svg{width:20px;height:20px}
+  .tabbar button.on{color:var(--accent);border-top-color:var(--accent)}
+  .tabbar button.on svg{color:var(--accent)}
+
+  @media(min-width:900px){
+    #admin{padding-bottom:0;display:grid;grid-template-columns:220px 1fr;grid-template-rows:auto 1fr}
+    .appbar{grid-column:1/3}
+    .tabbar{position:static;grid-column:1;grid-row:2;display:flex;flex-direction:column;border-top:0;border-right:1px solid var(--line);padding:12px 8px;gap:1px;align-self:start;height:100%}
+    .tabbar button{flex-direction:row;justify-content:flex-start;gap:11px;padding:11px 13px;font-size:10px;border-top:0;border-left:2px solid transparent;margin-top:0}
+    .tabbar button.on{border-left-color:var(--accent)}
+    .tabbar button svg{width:16px;height:16px}
+    .view{grid-column:2;grid-row:2;max-width:1040px;padding:26px 30px;overflow-y:auto}
+    #view-verify{max-width:700px}
+    .an-two,.exp-grid{grid-template-columns:1fr 1fr}
+  }
+  /* masonry tile wall (More) */
+  .tilegrid{column-width:210px;column-gap:12px}
+  .tile{break-inside:avoid;display:block;width:100%;margin:0 0 12px;background:var(--panel);border:1px solid var(--line);padding:16px 16px 17px;text-align:left;cursor:pointer;color:var(--text);font-family:inherit;box-shadow:var(--shadow);transition:.12s}
+  .tile:hover{border-color:var(--accent)}
+  .tile .ti{width:32px;height:32px;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;margin-bottom:13px;color:var(--accent)}
+  .tile .ti svg{width:16px;height:16px}
+  .tile .tt{display:block;font-family:'Newsreader',Georgia,serif;font-size:17px;color:var(--text);line-height:1.15}
+  .tile .tds{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:7px;line-height:1.55;letter-spacing:.01em}
+  @media(min-width:900px){ .tilegrid{column-width:230px} }
+  .plan-thumb{width:46px;height:46px;object-fit:cover;border:1px solid var(--line2);flex:none;display:block}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <section id="signin" class="hide">
+    <div class="authcard">
+      <div class="mono">NC</div>
+      <div class="eyebrow">The North Creek Estate</div>
+      <h1 style="margin:.3rem 0 1rem">Estate Verify</h1>
+      <p class="muted small" style="margin-top:0">Sign in with your staff email. We'll send a one-time link &mdash; no password.</p>
+      <input id="email" type="email" placeholder="you@thenorthcreek.com" autocomplete="email" inputmode="email">
+      <button id="sendLink" class="btn btn--solid mt">Email me a sign-in link</button>
+      <p id="signinMsg" class="small mt" style="min-height:1em"></p>
+    </div>
+  </section>
+
+  <section id="denied" class="hide">
+    <div class="authcard">
+      <div class="mono" style="border-color:var(--red);color:var(--red)">&#10007;</div>
+      <h2>Not authorized</h2>
+      <p class="muted small">This account isn't on the staff list. Ask an admin to add your email.</p>
+      <button id="signout1" class="btn mt">Sign out</button>
+    </div>
+  </section>
+
+  <section id="admin" class="hide">
+    <div class="appbar">
+      <div class="brand"><span class="mono">NC</span><span class="ttl">Estate Verify<small id="roleTag">operations</small></span></div>
+      <div style="display:flex;align-items:center;gap:8px"><span id="whoami" class="who"></span><button id="themeToggle" class="iconbtn" aria-label="Toggle theme" title="Toggle light/dark">DARK</button><button id="signout2" class="btn btn--ghost" style="width:auto;padding:7px 12px;font-size:11px">Sign out</button></div>
+    </div>
+
+    <!-- VERIFY -->
+    <div id="view-verify" class="view">
+      <div class="searchwrap">
+        <input id="q" type="search" placeholder="Scan or search &mdash; name, email, or pass code" autocomplete="off" autocapitalize="none">
+        <div class="searchrow">
+          <button id="qGo" class="btn btn--solid">Verify</button>
+          <button id="startCam" class="scanbtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3"/><line x1="4" y1="12" x2="20" y2="12"/></svg>Scan</button>
+        </div>
+        <video id="video" playsinline></video>
+      </div>
+      <div id="verdict"></div>
+      <div id="verifyHint" class="hint">Point the camera at a guest's QR pass, or type a name, email, or pass code to verify membership, passes, and tickets.</div>
+    </div>
+
+    <!-- EVENTS -->
+    
+
+    <!-- MORE -->
+    <div id="view-more" class="view hide">
+      <div id="moreMenu">
+        <h2 class="vh">Operations</h2>
+        <div class="tilegrid">
+          <button class="tile" data-more="checkin"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></span><span class="tt">Event Check-in</span><span class="tds">Scan guests in at an event; live headcount.</span></button>
+          <button class="tile" data-more="events" data-role="manager"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></span><span class="tt">Events</span><span class="tds">Build and edit the invitations calendar.</span></button>
+          <button class="tile" data-more="dash"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span><span class="tt">Dashboard</span><span class="tds">Members, passes, check-ins, and revenue at a glance.</span></button>
+          <button class="tile" data-more="members"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><path d="M16 5.5a3 3 0 010 5.8M21 20c0-2.5-1.5-4.2-4-4.7"/></svg></span><span class="tt">Members &amp; Guests</span><span class="tds">The full book — every guest with a complete timeline.</span></button>
+          <button class="tile" data-more="analytics" data-role="manager"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="12"/><line x1="10" y1="20" x2="10" y2="5"/><line x1="16" y1="20" x2="16" y2="9"/><line x1="21" y1="20" x2="3" y2="20"/></svg></span><span class="tt">Analytics &amp; Revenue</span><span class="tds">Live MRR, revenue, retention, and event performance.</span></button>
+          <button class="tile" data-more="exports" data-role="manager"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></span><span class="tt">Exports &amp; Reports</span><span class="tds">CSV exports and the printable board report.</span></button>
+          <button class="tile" data-more="roster"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r=".6"/><circle cx="3.5" cy="12" r=".6"/><circle cx="3.5" cy="18" r=".6"/></svg></span><span class="tt">Roster</span><span class="tds">Everyone holding a pass or membership.</span></button>
+          <button class="tile" data-more="plans" data-role="manager"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.1"/></svg></span><span class="tt">Plans &amp; Pricing</span><span class="tds">Edit prices and sync to Stripe.</span></button>
+          <button class="tile" data-more="bookings" data-role="manager"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg></span><span class="tt">Bookings</span><span class="tds">Range bays, venue spaces, and tours.</span></button>
+          <button class="tile" data-more="scanlog" data-role="manager"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l7 3v6c0 4.5-3 8.3-7 9.5C8 19.3 5 15.5 5 11V5z"/><path d="M9.5 12l2 2 3.5-4"/></svg></span><span class="tt">Security &amp; Audit</span><span class="tds">Tamper-evident, hash-chained log of every security event.</span></button>
+          <button class="tile" data-more="staff" data-role="owner"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="16" y1="11" x2="22" y2="11"/></svg></span><span class="tt">Staff &amp; Roles</span><span class="tds">Create operators and set their access.</span></button>
+        </div>
+      </div>
+
+      <div id="more-checkin" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:20px">Event Check-in</h2></div>
+        <div class="card">
+        <div class="row"><select id="eventPick" class="grow"><option value="">Choose an event&hellip;</option></select><button id="eventLoad" class="btn btn--solid" style="width:auto">Load</button></div>
+        <div id="eventCount" class="mt center"></div>
+        <div id="eventList" class="mt" style="overflow:auto"></div>
+      </div>
+      </div>
+
+      <div id="more-events" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:20px">Events</h2></div>
+        <div id="eventsCms" class="card">
+        <button id="evNew" class="btn btn--solid">+ New event</button>
+        <div id="eventsAdminList" class="mt" style="overflow:auto"></div>
+        <div id="evEditor" class="card hide" style="margin-top:14px;border-color:var(--accent)">
+          <input type="hidden" id="ev_id">
+          <label class="small muted">Title</label><input id="ev_title">
+          <div class="row mt"><div class="grow"><label class="small muted">Date</label><input id="ev_date" type="date"></div>
+            <div class="grow"><label class="small muted">Time label</label><input id="ev_time" placeholder="4:00&ndash;8:00 PM"></div></div>
+          <div class="row mt"><div class="grow"><label class="small muted">Location</label><input id="ev_loc"></div>
+            <div><label class="small muted">Category</label><select id="ev_category"><option value="event">event</option><option value="promo">promo</option></select></div>
+            <div><label class="small muted">Label</label><select id="ev_label"><option value="">&mdash;</option><option>Signature Gathering</option><option>Estate Event</option><option>Partner Hosted</option><option>Member Exclusive</option><option>Limited Promotion</option></select></div></div>
+          <label class="small muted mt" style="display:block">Blurb</label><input id="ev_blurb">
+          <div class="mt"><label class="small muted">Ticket URL</label><input id="ev_ticket"></div>
+          <div class="row mt"><label class="small"><input type="checkbox" id="ev_featured" style="width:auto"> Featured</label>
+            <label class="small"><input type="checkbox" id="ev_published" style="width:auto"> Published</label></div>
+          <div class="mt"><label class="small muted">Hero image</label><input id="ev_hero" type="file" accept="image/*"></div>
+          <div class="mt"><label class="small muted">Flyer</label><input id="ev_flyer" type="file" accept="image/*"></div>
+          <div class="row mt"><button id="evSave" class="btn btn--solid">Save</button><button id="evDelete" class="btn btn--danger" style="width:auto">Delete</button><button id="evCancel" class="btn" style="width:auto">Cancel</button></div>
+          <p id="evMsg" class="small mt"></p>
+        </div>
+      </div>
+      </div>
+
+      <div id="more-members" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:22px">Members &amp; Guests</h2></div>
+        <div id="memberList">
+          <div class="card">
+            <div class="row"><input id="memQ" class="grow" placeholder="Search name or email"><button id="memSearch" class="btn btn--solid" style="width:auto">Search</button></div>
+            <div class="mt" style="overflow:auto"><table><thead><tr><th>Member</th><th>Holds</th><th>Status</th></tr></thead><tbody id="memBody"><tr><td colspan="3" class="muted small">Loading&hellip;</td></tr></tbody></table></div>
+          </div>
+        </div>
+        <div id="memberDetail" class="hide"></div>
+      </div>
+
+      <div id="more-analytics" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:22px">Analytics &amp; Revenue</h2></div>
+        <div id="anStats" class="an-grid"></div>
+        <div class="card mt"><h4>Membership growth</h4><div id="anGrowth" class="mt"><span class="muted small">Loading&hellip;</span></div></div>
+        <div class="an-two mt">
+          <div class="card"><h4>Retention</h4><div id="anChurn" class="mt"><span class="muted small">Loading&hellip;</span></div></div>
+          <div class="card"><h4>By product</h4><div id="anProduct" class="mt" style="overflow:auto"><span class="muted small">Loading&hellip;</span></div></div>
+        </div>
+        <div class="card mt"><h4>Event performance</h4><div id="anEvents" class="mt" style="overflow:auto"><span class="muted small">Loading&hellip;</span></div></div>
+        <div class="card mt"><h4>Recent payments <span class="small muted">(live from Stripe)</span></h4><div id="anPayments" class="mt" style="overflow:auto"><span class="muted small">Loading&hellip;</span></div></div>
+      </div>
+
+      <div id="more-exports" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:22px">Exports &amp; Reports</h2></div>
+        <div class="card">
+          <h4>Data exports</h4>
+          <p class="small muted">Download current data as CSV for your records, accountant, or board packet.</p>
+          <div class="exp-grid mt">
+            <button id="expMembers" class="btn btn--solid">Members &amp; memberships (CSV)</button>
+            <button id="expPasses" class="btn btn--solid">Passes &amp; tickets (CSV)</button>
+            <button id="expCheckins" class="btn btn--solid">Check-in history (CSV)</button>
+            <button id="expEvents" class="btn btn--solid">Events (CSV)</button>
+          </div>
+        </div>
+        <div class="card mt">
+          <h4>Board report</h4>
+          <p class="small muted">A one-page summary &mdash; members, revenue, growth, and event performance &mdash; formatted to print or save as PDF.</p>
+          <button id="genReport" class="btn btn--gold mt">Generate board report</button>
+        </div>
+      </div>
+
+      <div id="more-bookings" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:22px">Bookings</h2></div>
+        <div class="card">
+          <div class="row">
+            <select id="bkKind" style="width:auto"><option value="">All kinds</option><option value="range">Range bays</option><option value="space">Venue spaces</option><option value="tour">Tours</option></select>
+            <select id="bkStatus" style="width:auto"><option value="">All status</option><option value="requested">Requested</option><option value="confirmed">Confirmed</option><option value="completed">Completed</option><option value="canceled">Canceled</option></select>
+            <button id="bkRefresh" class="btn btn--solid" style="width:auto">Refresh</button>
+            <button id="bkNew" class="btn" style="width:auto">+ New booking</button>
+          </div>
+          <div class="mt" style="overflow:auto"><table><thead><tr><th>Date</th><th>Resource</th><th>Guest</th><th>Status</th><th></th></tr></thead><tbody id="bkBody"><tr><td colspan="5" class="muted small">Loading&hellip;</td></tr></tbody></table></div>
+        </div>
+        <div id="bkEditor" class="card hide" style="margin-top:14px;border-color:var(--accent)">
+          <h4 id="bkEditTitle">New booking</h4>
+          <input type="hidden" id="bk_id">
+          <div class="row mt"><div><label class="small muted">Kind</label><select id="bk_kind"><option value="range">Range bay</option><option value="space">Venue space</option><option value="tour">Tour</option></select></div>
+            <div class="grow"><label class="small muted">Resource</label><input id="bk_resource" placeholder="Bay 4 · The Grand · The Garden Spaces"></div></div>
+          <div class="row mt"><div class="grow"><label class="small muted">Guest name</label><input id="bk_name"></div>
+            <div class="grow"><label class="small muted">Email</label><input id="bk_email" inputmode="email"></div></div>
+          <div class="row mt"><div><label class="small muted">Date</label><input id="bk_date" type="date"></div>
+            <div class="grow"><label class="small muted">Time / detail</label><input id="bk_time" placeholder="4:00–8:00 PM · 2 buckets"></div>
+            <div><label class="small muted">Party</label><input id="bk_party" type="number" inputmode="numeric" style="max-width:90px"></div></div>
+          <div class="row mt"><div><label class="small muted">Amount (USD)</label><input id="bk_amount" type="number" step="0.01" inputmode="decimal" style="max-width:130px"></div>
+            <div><label class="small muted">Status</label><select id="bk_status"><option value="requested">requested</option><option value="confirmed">confirmed</option><option value="completed">completed</option><option value="canceled">canceled</option></select></div></div>
+          <label class="small muted mt" style="display:block">Notes</label><input id="bk_notes">
+          <div class="row mt"><button id="bkSave" class="btn btn--solid">Save</button><button id="bkDelete" class="btn btn--danger" style="width:auto">Delete</button><button id="bkCancel" class="btn" style="width:auto">Cancel</button></div>
+          <p id="bkMsg" class="small mt"></p>
+        </div>
+      </div>
+
+      <div id="more-scanlog" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:20px">Security &amp; Audit</h2></div>
+        <div class="card" style="border-left:2px solid var(--accent)">
+          <div class="row"><div style="flex:1;min-width:200px"><div class="k">Chain integrity</div><div id="intStatus" class="mt" style="font-family:'Newsreader',Georgia,serif;font-size:18px;color:var(--muted)">Not verified</div></div><button id="intVerify" class="btn" style="width:auto">Verify chain</button></div>
+          <div class="small muted mt">Every entry is SHA-256 hash-chained to the previous one and the table is append-only. Any alteration or deletion breaks the chain and is detected here.</div>
+        </div>
+        <div class="card mt">
+          <div class="row">
+            <select id="auCat" style="width:auto"><option value="">All categories</option><option value="authentication">authentication</option><option value="verification">verification</option><option value="admin">admin</option><option value="data_access">data access</option><option value="security">security</option><option value="financial">financial</option></select>
+            <select id="auSev" style="width:auto"><option value="">All levels</option><option value="info">info</option><option value="notice">notice</option><option value="warning">warning</option><option value="critical">critical</option></select>
+            <button id="scanRefresh" class="btn" style="width:auto">Refresh</button>
+          </div>
+          <div class="mt" style="overflow:auto"><table><thead><tr><th>Time</th><th>Event</th><th>Level</th><th>Operator</th><th>Subject</th><th>Location</th></tr></thead><tbody id="scanBody"><tr><td colspan="6" class="muted small">Loading&hellip;</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <div id="more-dash" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:22px">Dashboard</h2></div>
+        <div class="stat"><div class="k">Active members</div><div class="v" id="mActive">&ndash;</div></div>
+        <div class="stat"><div class="k">Passes issued</div><div class="v" id="mPasses">&ndash;</div></div>
+        <div class="stat"><div class="k">Checked in &middot; tickets</div><div class="v" id="mCheckins">&ndash;</div></div>
+        <div class="stat"><div class="k">Est. monthly recurring</div><div class="v" id="mMRR">&ndash;</div></div>
+        <div class="card"><h4>By product</h4><div style="overflow:auto"><table><thead><tr><th>Product</th><th>Active</th><th>Canceled</th></tr></thead><tbody id="dashByProduct"><tr><td colspan="3" class="muted small">Loading&hellip;</td></tr></tbody></table></div></div>
+      </div>
+
+      <div id="more-roster" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:22px">Roster</h2></div>
+        <div class="card">
+          <div class="row"><input id="rosterQ" class="grow" placeholder="Search name or email"><button id="rosterRefresh" class="btn btn--solid" style="width:auto">Search</button></div>
+          <div class="mt" style="overflow:auto"><table><thead><tr><th>Holder</th><th>Product</th><th>Status</th></tr></thead><tbody id="rosterBody"><tr><td colspan="3" class="muted small">Loading&hellip;</td></tr></tbody></table></div>
+        </div>
+      </div>
+
+      <div id="more-plans" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:22px">Plans &amp; Pricing</h2></div>
+        <div class="card">
+          <p class="small muted" style="margin-top:0">Edit a price, then <b>Sync to Stripe</b>. Changing an amount creates a new Stripe price and retires the old one.</p>
+          <div style="overflow:auto"><table><thead><tr><th>Plan</th><th>Price</th><th>Stripe</th><th></th></tr></thead><tbody id="plansBody"><tr><td colspan="4" class="muted small">Loading&hellip;</td></tr></tbody></table></div>
+        </div>
+        <div id="planEditor" class="card hide" style="margin-top:14px;border-color:var(--accent)">
+          <input type="hidden" id="pl_id"><input type="hidden" id="pl_key"><input type="hidden" id="pl_kind">
+          <label class="small muted">Name</label><input id="pl_name">
+          <label class="small muted mt" style="display:block">Description</label><input id="pl_desc">
+          <div id="pl_image_wrap" class="mt" style="display:none">
+            <label class="small muted">Image (estate photo path or URL)</label>
+            <div class="row" style="align-items:center;gap:11px;flex-wrap:nowrap"><img id="pl_thumb" class="plan-thumb" src="" alt=""><input id="pl_image" placeholder="image/DrivingRangeBallPerspective.jpg" style="flex:1"></div>
+          </div>
+          <div class="row mt"><div class="grow"><label class="small muted">Price (USD)</label><input id="pl_price" type="number" step="0.01" min="0" inputmode="decimal"></div>
+            <div><label class="small muted">Interval</label><select id="pl_interval"><option value="month">month</option><option value="year">year</option><option value="one_time">one_time</option></select></div></div>
+          <label class="small mt" style="display:block"><input type="checkbox" id="pl_active" style="width:auto"> Active</label>
+          <div class="row mt"><button id="planSave" class="btn btn--solid">Save</button><button id="planSync" class="btn">Save &amp; Sync to Stripe</button><button id="planCancel" class="btn" style="width:auto">Cancel</button></div>
+          <p id="planMsg" class="small mt"></p>
+        </div>
+      </div>
+
+      <div id="more-staff" class="more-panel hide">
+        <div class="subhead"><button class="backbtn" data-back>&lsaquo; Back</button><h2 style="font-size:22px">Staff &amp; Roles</h2></div>
+        <div class="card">
+          <div class="row"><input id="st_email" class="grow" placeholder="name@thenorthcreek.com" inputmode="email">
+            <select id="st_role" style="width:auto"><option value="gate">gate</option><option value="manager">manager</option><option value="owner">owner</option></select>
+            <button id="stAdd" class="btn btn--solid" style="width:auto">Create user</button></div>
+          <label class="small mt" style="display:inline-flex;align-items:center;gap:7px;color:var(--muted)"><input type="checkbox" id="st_invite" checked style="width:auto"> Email them a sign-in link now</label>
+          <div class="mt" style="overflow:auto"><table><thead><tr><th>Email</th><th>Role</th><th></th></tr></thead><tbody id="staffBody"><tr><td colspan="3" class="muted small">Loading&hellip;</td></tr></tbody></table></div>
+          <p class="small muted">owner = full incl. staff &middot; manager = all except staff &middot; gate = verify &amp; check-in only.</p>
+          <p id="stMsg" class="small"></p>
+        </div>
+      </div>
+    </div>
+
+    <nav class="tabbar">
+      <button data-view="more" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Home</button>
+      <button data-view="verify"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3"/><line x1="4" y1="12" x2="20" y2="12"/></svg>Verify</button>
+    </nav>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

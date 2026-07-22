@@ -1,0 +1,2 @@
+STAGING → sherosspeaks.com/nc/ · upload HTML + nc-events.js + config.js into /nc/. Leave server image/ alone.
+This build: circle-monogram logo (Option 2) in header + footer.
