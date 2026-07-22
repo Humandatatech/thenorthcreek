@@ -303,38 +303,42 @@ addEventListener('resize',function(){if(innerWidth>920)setNav(false)});}
    av=document.getElementById('avail'),sr=document.getElementById('sumRate'),sq=document.getElementById('sumQty'),
    st=document.getElementById('sumTotal'),pn=document.getElementById('promoNote'),ok=document.getElementById('bkOk'),
    reserveBtn=document.getElementById('bkReserve');
- var MAXBAYS=4, TOTAL=10;          // hard cap per reservation, and total bays on the range
- var selected=new Set(), slotTaken=0, slotOpen=0, capMsg=null, capTimer=null;
- var today=new Date();d.value=today.toISOString().slice(0,10);d.min=d.value;
+ var MAXBAYS=4, TOTAL=10;                 // per-reservation cap · physical bays on the range
+ var LAUNCH='2026-08-17';                  // The Range opens to bookings on this date
+ var selected=new Set(), takenSet=new Set(), slotOpen=TOTAL, loading=false, capMsg=null, capTimer=null, loadSeq=0;
+ var today=new Date().toISOString().slice(0,10);
+ var minDate = today > LAUNCH ? today : LAUNCH;
+ d.min=minDate; d.value=minDate;
  for(var h=8;h<=19;h++){var o=document.createElement('option');var hr=h>12?h-12:h;var ap=h>=12?'PM':'AM';o.textContent=hr+':00 '+ap;o.value=h;t.appendChild(o)}
  t.value=10;
- function hash(s){var x=0;for(var i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))%97;return x}
- function computeSlot(){slotTaken=hash(d.value+'-'+t.value)%(TOTAL+1);slotOpen=TOTAL-slotTaken;}
+ function slotLabel(){return t.options[t.selectedIndex].textContent;}
  function flash(msg){capMsg=msg;clearTimeout(capTimer);capTimer=setTimeout(function(){capMsg=null;paintAvail();},2600);paintAvail();}
  function paintAvail(){
    var text,warn=false;
-   if(slotOpen===0){text='This time is fully booked — please choose another time';warn=true;}
+   if(loading){text='Checking availability…';}
+   else if(slotOpen===0){text='This time is fully booked — please choose another time';warn=true;}
    else{
      text=slotOpen+' of '+TOTAL+' bays open at this time';
      if(selected.size>0)text+=' · '+selected.size+' selected';
    }
-   if(capMsg){text=slotOpen+' of '+TOTAL+' bays open · '+capMsg;warn=true;}
-   else if(slotOpen>0 && (parseInt(g.value)||1)>slotOpen){text+=' · reduce golfers or pick another time';warn=true;}
+   if(capMsg){text=capMsg;warn=true;}
+   else if(!loading && slotOpen>0 && (parseInt(g.value)||1)>slotOpen){text+=' · reduce golfers or pick another time';warn=true;}
    av.textContent=text;av.classList.toggle('warn',warn);
  }
- function updateReserve(){var off=(slotOpen===0);reserveBtn.classList.toggle('is-disabled',off);reserveBtn.setAttribute('aria-disabled',off?'true':'false');}
+ function updateReserve(){var off=(slotOpen===0)||loading;reserveBtn.classList.toggle('is-disabled',off);reserveBtn.setAttribute('aria-disabled',off?'true':'false');}
  function buildPads(){
    padsEl.innerHTML='';
-   for(var i=0;i<TOTAL;i++){
+   for(var n=1;n<=TOTAL;n++){
      var p=document.createElement('span');
-     if(i<slotTaken){p.className='pad taken';p.setAttribute('aria-hidden','true');padsEl.appendChild(p);continue;}
-     var num=i-slotTaken+1, on=selected.has(num);
-     p.className='pad open'+(on?' sel':'');p.textContent=num;
+     if(takenSet.has(n)){p.className='pad taken';p.setAttribute('aria-hidden','true');padsEl.appendChild(p);continue;}
+     var on=selected.has(n);
+     p.className='pad open'+(on?' sel':'');p.textContent=n;
      p.setAttribute('role','button');p.setAttribute('tabindex','0');
      p.setAttribute('aria-pressed',on?'true':'false');
-     p.setAttribute('aria-label','Bay '+num+(on?', selected':', available'));
+     p.setAttribute('aria-label','Bay '+n+(on?', selected':', available'));
      (function(n){
        function toggle(){
+         if(loading)return;
          if(selected.has(n)){selected.delete(n);}
          else{
            if(selected.size>=MAXBAYS){flash('up to '+MAXBAYS+' bays per reservation');return;}
@@ -344,7 +348,7 @@ addEventListener('resize',function(){if(innerWidth>920)setNav(false)});}
        }
        p.addEventListener('click',toggle);
        p.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
-     })(num);
+     })(n);
      padsEl.appendChild(p);
    }
  }
@@ -356,12 +360,30 @@ addEventListener('resize',function(){if(innerWidth>920)setNav(false)});}
    sq.textContent=qty+(dbl?' × double balls':'')+(' bucket'+(qty>1?'s':''));
    st.textContent='$'+(rate*qty);
  }
- function renderSlot(){selected.clear();capMsg=null;computeSlot();buildPads();paintAvail();renderSummary();updateReserve();}
+ async function loadSlot(){
+   selected.clear();capMsg=null;loading=true;
+   var seq=++loadSeq;
+   paintAvail();updateReserve();
+   var taken=[];
+   var cfg=(window.NC_CONFIG&&NC_CONFIG.supabase)||{};
+   if(cfg.url&&cfg.anonKey){
+     try{
+       var r=await fetch(cfg.url+'/rest/v1/rpc/range_taken_bays',{method:'POST',
+         headers:{apikey:cfg.anonKey,Authorization:'Bearer '+cfg.anonKey,'Content-Type':'application/json'},
+         body:JSON.stringify({p_date:d.value,p_slot:slotLabel()})});
+       if(r.ok) taken=await r.json()||[];
+     }catch(err){ taken=[]; }
+   }
+   if(seq!==loadSeq)return;                    // a newer request superseded this one
+   takenSet=new Set(taken);slotOpen=TOTAL-takenSet.size;loading=false;
+   buildPads();paintAvail();renderSummary();updateReserve();
+ }
  function renderSoft(){paintAvail();renderSummary();updateReserve();}
- [d,t].forEach(function(el){el.addEventListener('change',renderSlot);el.addEventListener('input',renderSlot);});
+ [d,t].forEach(function(el){el.addEventListener('change',loadSlot);});
  [q,g,m].forEach(function(el){el.addEventListener('input',renderSoft);el.addEventListener('change',renderSoft);});
- renderSlot();
+ loadSlot();
  reserveBtn.addEventListener('click',async function(e){e.preventDefault();
+   if(loading)return;
    if(slotOpen===0){flash('this time is fully booked');return;}
    if(selected.size===0){flash('select at least one bay to reserve');return;}
    var nm=(document.getElementById('bkName').value||'').trim();
@@ -370,12 +392,12 @@ addEventListener('resize',function(){if(innerWidth>920)setNav(false)});}
    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){flash('add a valid email for your confirmation');return;}
    var bays=Array.from(selected).sort(function(a,b){return a-b;});
    var qty=parseInt(q.value)||1; var rate=m.checked?12:15;
-   var whenTxt=t.options[t.selectedIndex].textContent+' on '+d.value+' \u00b7 Bay'+(bays.length>1?'s':'')+' '+bays.join(', ');
+   var whenTxt=slotLabel()+' on '+d.value+' · Bay'+(bays.length>1?'s':'')+' '+bays.join(', ');
    var cfg=(window.NC_CONFIG&&NC_CONFIG.supabase)||{};
    var row={kind:'range',resource:'Bay'+(bays.length>1?'s ':' ')+bays.join(', '),name:nm,email:em,
-     booking_date:d.value,time_slot:t.options[t.selectedIndex].textContent,
+     booking_date:d.value,time_slot:slotLabel(),
      party_size:parseInt(g.value)||1,amount_cents:rate*qty*100,status:'requested',
-     notes:'buckets: '+qty+(m.checked?' \u00b7 estate pass holder':'')+(pn.style.display!=='none'?' \u00b7 Run It Back':'')};
+     notes:'buckets: '+qty+(m.checked?' · estate pass holder':'')+(pn.style.display!=='none'?' · Run It Back':'')};
    reserveBtn.classList.add('is-disabled');
    var sent=false;
    if(cfg.url&&cfg.anonKey){
@@ -387,10 +409,11 @@ addEventListener('resize',function(){if(innerWidth>920)setNav(false)});}
      }catch(err){sent=false;}
    }
    reserveBtn.classList.remove('is-disabled');
-   if(!sent){flash('could not reach the booking desk \u2014 please try again');return;}
+   if(!sent){flash('could not reach the booking desk — please try again');return;}
    document.getElementById('okWhen').textContent=whenTxt;
-   document.getElementById('okWhat').textContent=sq.textContent+' \u2014 '+st.textContent;
+   document.getElementById('okWhat').textContent=sq.textContent+' — '+st.textContent;
    ok.classList.add('show');ok.scrollIntoView({behavior:'smooth',block:'center'});
+   loadSlot();                                 // refresh availability — the booked bays now show as taken
  });
 })();</script>
 </body></html>
