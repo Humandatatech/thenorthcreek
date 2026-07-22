@@ -25,6 +25,15 @@ window.NC_CONFIG = {
   checkoutEnabled: true,
   checkoutComingSoonMsg: "Enrollment opens shortly. Email events@thenorthcreek.com to be invited first.",
 
+  /* Per-product launch gating. A key listed here cannot be purchased before its
+   * "from" date (visitor's local midnight) — clicking shows the message instead of
+   * opening Stripe. The gate lifts automatically on that date; no redeploy needed.
+   * Keys NOT listed (creek-pass, founding-*, tickets) are purchasable immediately. */
+  availability: {
+    "estate-pass":  { from: "2026-08-17", msg: "Estate Pass enrollment opens August 17, 2026. Email events@thenorthcreek.com to be first in line." },
+    "range-bucket": { from: "2026-08-17", msg: "Practice Range buckets go on sale August 17, 2026 — opening day." }
+  },
+
   /* Stripe Dashboard > Payments > Payment Links — paste each LIVE URL here.
      Recurring links (memberships) create a Subscription; one-time links create a Charge. */
   paymentLinks: {
@@ -54,6 +63,13 @@ window.NC_CONFIG = {
     return u.toString();
   }
   function enabled() { return !!(window.NC_CONFIG && NC_CONFIG.checkoutEnabled); }
+  // Returns the gate entry if this product is not yet on sale, else null.
+  function gateInfo(key) {
+    var a = (window.NC_CONFIG && NC_CONFIG.availability) || {};
+    var g = a[key];
+    if (!g || !g.from) return null;
+    return new Date() >= new Date(g.from + "T00:00:00") ? null : g;
+  }
   function toast(msg) {
     var t = document.getElementById("nc-toast");
     if (!t) {
@@ -72,19 +88,26 @@ window.NC_CONFIG = {
     var links = (window.NC_CONFIG && NC_CONFIG.paymentLinks) || {};
     var live = enabled();
     document.querySelectorAll("[data-pay]").forEach(function (el) {
-      var url = live ? build(links[el.getAttribute("data-pay")]) : null;
+      var key = el.getAttribute("data-pay");
+      var gated = gateInfo(key);
+      var url = (live && !gated) ? build(links[key]) : null;
       if (url) { el.setAttribute("href", url); el.removeAttribute("data-unconfigured"); el.removeAttribute("data-gated"); }
-      else if (!live) { el.setAttribute("data-gated", "1"); }        // checkout switched off
-      else { el.setAttribute("data-unconfigured", "1"); }            // live, but no link yet
+      else if (!live || gated) { el.setAttribute("data-gated", "1"); }  // checkout off, or product not yet on sale
+      else { el.setAttribute("data-unconfigured", "1"); }               // live, but no link yet
     });
   }
-  // While checkout is off, intercept clicks on pay buttons so none reach Stripe.
+  // Intercept clicks on pay buttons that shouldn't reach Stripe yet —
+  // either checkout is off globally, or the product isn't on sale until its date.
   document.addEventListener("click", function (e) {
-    if (enabled()) return;
     var el = e.target.closest && e.target.closest("[data-pay]");
     if (!el) return;
-    e.preventDefault();
-    toast((window.NC_CONFIG && NC_CONFIG.checkoutComingSoonMsg) || "Enrollment opens shortly.");
+    if (!enabled()) {
+      e.preventDefault();
+      toast((window.NC_CONFIG && NC_CONFIG.checkoutComingSoonMsg) || "Enrollment opens shortly.");
+      return;
+    }
+    var g = gateInfo(el.getAttribute("data-pay"));
+    if (g) { e.preventDefault(); toast(g.msg || "This opens soon — check back on launch day."); }
   }, true);
   if (document.readyState !== "loading") upgrade();
   else document.addEventListener("DOMContentLoaded", upgrade);
