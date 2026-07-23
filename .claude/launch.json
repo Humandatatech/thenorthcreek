@@ -6,6 +6,11 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8788", "--bind", "127.0.0.1"],
       "port": 8788
+    },
+    {
+      "name": "sphere-attach",
+      "url": "http://localhost:8742",
+      "port": 8742
     }
   ]
 }
